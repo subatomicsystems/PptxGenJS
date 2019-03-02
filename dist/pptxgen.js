@@ -77,8 +77,8 @@ if ( NODEJS || APPJS ) {
 
 var PptxGenJS = function(){
 	// APP
-	var APP_VER = "2.6.0-beta";
-	var APP_BLD = "20190209";
+	var APP_VER = "2.5.0";
+	var APP_BLD = "20190208";
 
 	// CONSTANTS
 	var MASTER_OBJECTS = {
@@ -159,7 +159,8 @@ var PptxGenJS = function(){
 	var AXIS_ID_VALUE_SECONDARY = '2094734553';
 	var AXIS_ID_CATEGORY_PRIMARY = '2094734554';
 	var AXIS_ID_CATEGORY_SECONDARY = '2094734555';
-    var AXIS_ID_SERIES_PRIMARY = '2094734556';
+		var AXIS_ID_SERIES_PRIMARY = '2094734556';
+		var CUSTOM_LOCATION = '';
 
 	// A: Create internal pptx object
 	var gObjPptx = {};
@@ -1834,12 +1835,11 @@ var PptxGenJS = function(){
 						zip.generateAsync({type:'nodebuffer'}).then(function(content){ gObjPptx.saveCallback(content); });
 					}
 					else {
-						zip.generateAsync({type:'nodebuffer'}).then(function(content){ fs.writeFile(strExportName, content, function(){ gObjPptx.saveCallback(strExportName); } ); });
+						zip.generateAsync({type:'nodebuffer'}).then(function(content){ fs.writeFile(CUSTOM_LOCATION + strExportName, content, function(){ gObjPptx.saveCallback(strExportName); } ); });
 					}
 				}
-				else {
-					// Starting in late 2017 (Node ~8.9.1), `fs` requires a callback so use a dummy func
-					zip.generateAsync({type:'nodebuffer'}).then(function(content){ fs.writeFile(strExportName, content, function(){} ); });
+				else { 
+					zip.generateAsync({type:'nodebuffer'}).then(function(content){ fs.writeFileSync(CUSTOM_LOCATION + strExportName, content ); });
 				}
 			}
 			else {
@@ -5019,9 +5019,11 @@ var PptxGenJS = function(){
 	 * Export the Presentation to an .pptx file
 	 * @param {string} [inStrExportName] - Filename to use for the export
 	 */
-	this.save = function save(inStrExportName, funcCallback, outputType) {
+	this.save = function save(inStrExportName, location, funcCallback, outputType) {
 		var intRels = 0, arrRelsDone = [];
-
+    if(location){
+      CUSTOM_LOCATION = location;
+    }
 		// STEP 1: Add empty placeholder objects to slides that don't already have them
 		gObjPptx.slides.forEach(function(slide,idx){
 			if ( slide.layoutObj ) addPlaceholdersToSlides(slide);
